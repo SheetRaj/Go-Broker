@@ -138,9 +138,3 @@ go run .
 ```
 
 (Ensure `config.json` exists; by default it uses `./data` for storage. Data directory is gitignored.)
-
----
-
-## License
-
-Use and adapt as you like.
