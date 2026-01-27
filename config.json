@@ -1,0 +1,10 @@
+{
+    "server": {
+      "host": "127.0.0.1",
+      "port": 9000
+    },
+    "storage": {
+      "data_dir": "./data",
+      "sync_interval_ms": 1000
+    }
+  }

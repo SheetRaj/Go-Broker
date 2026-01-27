@@ -1,0 +1,42 @@
+# Binaries
+/go-broker
+Go-Broker
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Build output
+/bin/
+/dist/
+/build/
+
+# Data directory (WAL logs, indexes – do not commit)
+/data/
+
+# Go workspace / modules (keep go.sum; do not ignore)
+# vendor/   # uncomment if you use vendoring
+
+# Test and coverage
+*.test
+*.out
+coverage.html
+coverage.txt
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local config overrides (optional – remove if you want to track config.json)
+# config.local.json
+.env
+.env.local
+*.local
