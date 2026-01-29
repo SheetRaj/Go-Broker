@@ -4,60 +4,48 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 	"time"
 )
 
 func main() {
-	fmt.Println("👷 Starting Worker (Consumer)...")
-
-	// 1. Connect to the Broker (The Server you are already running)
-	conn, err := net.Dial("tcp", "localhost:9000")
-	if err != nil {
-		panic(err)
-	}
-	defer conn.Close()
-
+	conn, _ := net.Dial("tcp", "localhost:9000")
 	reader := bufio.NewReader(conn)
 
-	// Start at the beginning of the log
-	currentOffset := 0
+	// CONSUMER GROUP NAME
+	myGroup := "worker1"
 
-	// 2. The "Event Loop"
+	// 1. RECOVERY: Ask Server for last position
+	fmt.Fprintf(conn, "OFFSET %s\n", myGroup)
+	resp, _ := reader.ReadString('\n')
+	currentOffset, _ := strconv.Atoi(strings.TrimSpace(resp))
+
+	fmt.Printf("Resuming from Offset: %d\n", currentOffset)
+
 	for {
-		// A. Ask for data at the current offset
-		cmd := fmt.Sprintf("READ %d\n", currentOffset)
-		conn.Write([]byte(cmd))
-
-		// B. Read the Server's Response
+		// 2. Fetch
+		fmt.Fprintf(conn, "READ %d\n", currentOffset)
 		response, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Println("❌ Server disconnected")
 			return
 		}
-
 		response = strings.TrimSpace(response)
 
-		// C. Handle "No Data" (Polling)
-		if strings.HasPrefix(response, "ERR") {
-			// No message yet? Wait 1 second and try again.
-			time.Sleep(1 * time.Second)
-			continue
-		}
-
-		// D. Handle Success (MSG payload)
-		// Format: "MSG <payload>"
 		if strings.HasPrefix(response, "MSG ") {
-			// Extract the message part (remove "MSG " prefix)
 			msg := strings.TrimPrefix(response, "MSG ")
+			fmt.Printf("Processed: %s\n", msg)
 
-			// Process the message (Simulate work)
-			fmt.Printf("✅ Received at %d: %s\n", currentOffset, msg)
-
-			// E. Calculate next offset
-			// Next = Current + 4 (Header bytes) + Length of Data
+			// 3. Math (Next Offset)
 			length := len(msg)
-			currentOffset += 4 + length
+			currentOffset += 4 + length // Header + Data
+
+			// 4. CRITICAL: ACK (Save Progress)
+			fmt.Fprintf(conn, "ACK %s %d\n", myGroup, currentOffset)
+			// Read the OK from server to keep protocol sync
+			reader.ReadString('\n')
+		} else {
+			time.Sleep(1 * time.Second)
 		}
 	}
 }

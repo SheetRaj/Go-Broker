@@ -11,7 +11,7 @@ import (
 )
 
 // HandleConnection manages one client connection
-func HandleConnection(conn net.Conn, wal *storage.WAL) {
+func HandleConnection(conn net.Conn, wal *storage.WAL, om *storage.OffsetManager) {
 	defer conn.Close()
 	reader := bufio.NewReader(conn)
 
@@ -73,6 +73,28 @@ func HandleConnection(conn net.Conn, wal *storage.WAL) {
 			} else {
 				conn.Write([]byte(fmt.Sprintf("MSG %s\n", string(data))))
 			}
+		case "ACK":
+			// FORMAT: ACK <group> <offset>
+			// Example: ACK worker1 18
+			if len(parts) < 3 {
+				continue
+			}
+			group := parts[1]
+			offset, _ := strconv.Atoi(parts[2])
+
+			om.SaveOffset(group, offset)
+			conn.Write([]byte("OK\n"))
+			fmt.Printf("ACK: %s is now at %d\n", group, offset)
+
+		case "OFFSET":
+			// FORMAT: OFFSET <group>
+			// Example: OFFSET worker1
+			if len(parts) < 2 {
+				continue
+			}
+			group := parts[1]
+			savedOffset := om.GetOffset(group)
+			conn.Write([]byte(fmt.Sprintf("%d\n", savedOffset)))
 		default:
 			conn.Write([]byte("ERR: Unknown command\n"))
 		}
