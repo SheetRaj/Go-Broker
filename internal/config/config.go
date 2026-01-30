@@ -18,8 +18,9 @@ type ServerConfig struct {
 }
 
 type StorageConfig struct {
-	DataDir        string `json:"data_dir"`
-	SyncIntervalMs int    `json:"sync_interval_ms"`
+	DataDir                string `json:"data_dir"`
+	SyncIntervalMs         int    `json:"sync_interval_ms"`
+	MaxSegmentSizeBytes    int64  `json:"max_segment_size_bytes"`
 }
 
 // Load reads the config from a file

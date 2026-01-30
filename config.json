@@ -5,6 +5,7 @@
     },
     "storage": {
       "data_dir": "./data",
-      "sync_interval_ms": 1000
+      "sync_interval_ms": 1000,
+      "max_segment_size_bytes": 1000
     }
   }

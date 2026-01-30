@@ -15,7 +15,7 @@ func main() {
 	cfg, _ := config.Load("config.json")
 
 	// 1. Storage Engine
-	wal, err := storage.NewWAL(cfg.Storage.DataDir, "orders")
+	wal, err := storage.NewWAL(cfg.Storage.DataDir, "orders", cfg.Storage.MaxSegmentSizeBytes)
 	if err != nil {
 		log.Fatalf("WAL Error: %v", err)
 	}
