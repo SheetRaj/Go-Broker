@@ -33,14 +33,14 @@ flowchart LR
     A1[Order Service] --> A2[Payment]
     A2 --> A3[Inventory]
     A3 --> A4[Email]
-    A4 -.->|"Email down? Entire order fails"| X[]
+    A4 -.->|"Email down? Entire order fails"| X[❌]
   end
 
   subgraph After["With Go-Broker"]
     B1[Order Service] --> M[Go-Broker]
     M --> B2[Email Worker]
     M --> B3[Analytics Worker]
-    B2 -.->|"Picks up when ready"| OK[x]
+    B2 -.->|"Picks up when ready"| OK[✅]
   end
 ```
 
